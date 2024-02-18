@@ -1,0 +1,66 @@
+1.	Создать двух пользователей (с помощью метода User.objects.create_user('username')).
+from news.models import *
+u1 = User.objects.create_user(username='Николай')
+u2 = User.objects.create_user(username='Федот')
+2.	Создать два объекта модели Author, связанные с пользователями.
+
+Author.objects.create(authorUser=u1)
+Author.objects.create(authorUser=u2)
+a = Author.objects.get(id=1)
+b = Author.objects.get(id=2)
+
+3.	Добавить 4 категории в модель Category.
+Category.objects.create(name = 'IT')
+Category.objects.create(name = 'Авто')
+Category.objects.create(name = 'Изобретения')
+Category.objects.create(name = 'Космос')
+4.	Добавить 2 статьи и 1 новость.
+Post.objects.create(author=a, categoryType='AR', title='Искуственный интеллект увеличил количество обработанной информации', text='Популярность ИИ набирает обороты. Первое, что продвинул искусственный интелект это скорость обработки информации. Что раньше обрабатывалось за день, два сейчас обрабатывается за одну-две минуты. второе - С появлением моделей типа ChatGPT произошел новый виток в развитии рекламы. Это взяли на вооружение все крупные компании. Третье. ИИ стал доступнее. Сейчас любой человек имеет возможность синтезировать что-то своё.')
+Post.objects.create(author=b, categoryType='AR', title='Пересадить всех на электромобили - идея утопическая', text='Во всем мире сейчас настал бум электромобилей и многие страны для поддержания экологии планируют сокращать производство автомоилей с ДВС и накладывать санкции на их пользователей. Однако  сам глава совета директоров назвал идею пересадить всех на электромобили утопической в виду того, что больше 1/7 населения планеты живет без электричества и надо и для них выпускать автомобили. Японский путь развития сделал упор на гибридные средства передвижения.')
+Post.objects.create(author=b, categoryType='NW', title='Одна из камер Perseverance запечатлела солнечное затмение на Марсе', text='Спутник Марса Фобос отбросил тень на Солнце 8 февраля, и этот момент заснял марсоход. Ученые собрали 68 кадров, полученных при помощи  камеры Mastcam-Z Perseverance, и соединили в минутный ролик, где можно увиеть тень Фобоса, похожую на картофелину.')
+
+5.	Присвоить им категории (как минимум в одной статье/новости должно быть не меньше 2 категорий).
+Post.objects.get(id=1).postCategory.add(Category.objects.get(id=1))
+Post.objects.get(id=1).postCategory.add(Category.objects.get(id=3))
+Post.objects.get(id=2).postCategory.add(Category.objects.get(id=2))
+Post.objects.get(id=2).postCategory.add(Category.objects.get(id=3))
+Post.objects.get(id=3).postCategory.add(Category.objects.get(id=3))
+Post.objects.get(id=3).postCategory.add(Category.objects.get(id=4))
+
+6.	Создать как минимум 4 комментария к разным объектам модели Post (в каждом объекте должен быть как минимум один комментарий).
+Comment.objects.create(commentPost=Post.objects.get(id=1), commentUser=Author.objects.get(id=2).authorUser, text='ИИ повсюду')
+Comment.objects.create(commentPost=Post.objects.get(id=1), commentUser=Author.objects.get(id=1).authorUser, text='Интересная статья!')
+Comment.objects.create(commentPost=Post.objects.get(id=2), commentUser=Author.objects.get(id=1).authorUser, text='Сейчас наблюдаем закат электромобилей')
+Comment.objects.create(commentPost=Post.objects.get(id=3), commentUser=Author.objects.get(id=1).authorUser, text='Вот это да!')
+Comment.objects.create(commentPost=Post.objects.get(id=3), commentUser=Author.objects.get(id=2).authorUser, text='Впечатляющее зрелище! ')
+
+7.	Применяя функции like() и dislike() к статьям/новостям и комментариям, скорректировать рейтинги этих объектов.
+Post.objects.get(id=1).like()
+Post.objects.get(id=2).like()
+Post.objects.get(id=3).like()
+Post.objects.get(id=3).like()
+Post.objects.get(id=3).like()
+Comment.objects.get(id=1).like()
+Comment.objects.get(id=3).like()
+Comment.objects.get(id=3).dislike()
+Comment.objects.get(id=4).like()
+Comment.objects.get(id=4).like()
+Comment.objects.get(id=5).like()
+
+
+8.	Обновить рейтинги пользователей.
+a = Author.objects.get(id=1)
+a.update_rating()
+a.ratingAuthor
+ b = Author.objects.get(id=2)
+ b.update_rating()
+b.ratingAuthor
+
+9.	Вывести username и рейтинг лучшего пользователя (применяя сортировку и возвращая поля первого объекта).
+Author.objects.order_by('-ratingAuthor').values('authorUser__username','ratingAuthor').first()
+10.	Вывести дату добавления, username автора, рейтинг, заголовок и превью лучшей статьи, основываясь на лайках/дислайках к этой статье.
+Post.objects.order_by('rating').values('dateCreation','author__authorUser__username','rating','title').first();Post.objects.order_by('-rating').first().preview()
+
+11.	Вывести все комментарии (дата, пользователь, рейтинг, текст) к этой статье.
+
+idf=Post.objects.order_by('-rating').values('id').first();id_max = idf.get('id'); Comment.objects.filter(commentPost_id=id_max).values('text')
